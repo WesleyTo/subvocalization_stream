@@ -3,7 +3,6 @@ from time import time, sleep
 import serial
 import serial.tools.list_ports
 import wave
-import pyaudio
 import os
 
 
@@ -12,10 +11,10 @@ import os
 ##########################################
 TEMP = "temp.out"
 SAMPLE_RATE = 1000
-BUF_SIZE = 1 * 1024 #2KiB
+BUF_SIZE = 2000 #2KB
 OUTPUT_DIR = "audio" + str(datetime.now()).replace(" ", "_").replace(":", "-")
 OUTPUT = OUTPUT_DIR + "/{}.wav"
-OUTPUT_LENGTH = 0.998 #seconds
+OUTPUT_LENGTH = 0.997 #seconds
 
 def sec_to_str(sec):
 	ms = str(sec % 1)[2:5]
@@ -59,18 +58,21 @@ print(">>> COM PORT: '{}'".format(com_port))
 #			MAIN LOOP RECORDING			 #
 ##########################################
 try:
-	print(">>> CMD-C (CTRL-C) to Stop Recording")
+	print(">>> (CTRL-C) to Stop Recording")
 	buf = b''
 	clip_counter = 0
 	chunk = 0
 	start = time()
+	duration = time() - start
+	sleep(1 - duration)
 	while(True):
 		duration = time() - start
-		print("\r{}\tReading chunk #{}".format(sec_to_str(duration), chunk), end='')
+		#print("\r{}\tReading chunk #{}".format(sec_to_str(duration), chunk), end='')
+		print("{}\tReading chunk #{}".format(sec_to_str(duration), chunk))
 		clip_counter += 1
 		chunk += 1
 
-		# READ FROM ARDUINO STREAM
+		# READ UP TO BUF_SIZE KB FROM ARDUINO STREAM
 		rec_bytes = port.read(BUF_SIZE)
 		buf += rec_bytes
 		buf = buf[(SAMPLE_RATE * -2):]

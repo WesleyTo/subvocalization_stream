@@ -21,15 +21,15 @@ void plot(int value)
 
 void interrupt_handler()
 {
-  //Serial.println(micros());
-  //plot(analogRead(signalPin) + BIAS);
-  Serial.write(analogRead(signalPin) + BIAS);
+  plot(analogRead(signalPin) + BIAS);
+  //Serial.write(analogRead(signalPin) + BIAS);
 }
 
 void setup(void)
 {
   sample_rate *= 2;
   delay_us = 1000000 / sample_rate;
+  pinMode(signalPin, INPUT_PULLUP);
   Serial.begin(115200);
   Timer1.initialize(delay_us);
   Timer1.attachInterrupt(interrupt_handler);
