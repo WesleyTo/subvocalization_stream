@@ -21,8 +21,8 @@ void plot(int value)
 
 void interrupt_handler()
 {
-  plot(analogRead(signalPin) + BIAS);
-  //Serial.write(analogRead(signalPin) + BIAS);
+  //plot(analogRead(signalPin) + BIAS);
+  Serial.write(analogRead(signalPin) + BIAS);
 }
 
 void setup(void)
