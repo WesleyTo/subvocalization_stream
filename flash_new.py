@@ -7,115 +7,146 @@ from random import randint
 import random
 import datetime
 import sys
+import json
 from collections import deque
 
-# Pygame initialization
+##########################################
+#				PYGAME SETUP			 #
+##########################################
 pygame.init()
 screen = pygame.display.set_mode((640, 480))
 clock = pygame.time.Clock()
 done = False
 
-# Parse args 1: CSV, 2: Words flash delay, 3: CVS write delay
+##########################################
+#				ARG PARSING				 #
+##########################################
 parser = argparse.ArgumentParser()
 parser.add_argument(
 			'--csv',
 			type=str,
-			default='',
+			default='./outputs.csv',
 			help='Where to save the CSV file')
 parser.add_argument(
-			'--long_delay',
-			type=str,
-			default='',
-			help='Time in milliseconds of words to appear')
-parser.add_argument(
-			'--short_delay',
-			type=str,
-			default='Time in milliseconds to write to CSV',
-			help='')
-FLAGS, unparsed = parser.parse_known_args()
+			'--delay',
+			type=int,
+			default=500,
+			help='milliseconds that word appears on screen (500-1000 recommended)')
+args = parser.parse_args()
+file = args.csv
+delay = args.delay
+newDelay = 50
 
-# CSV filename/location to be stored
-file=str(unparsed[0])
-# Delay for words to flash 500-1000 millis recomended
-delay=int(unparsed[1])
-# Delay to write to csv file 50 millis recomended
-newDelay=int(unparsed[2])
+if not (file and delay):
+	raise Exception("Missing required arguments. Run with '-h' for help")
 
-def nearest_500(n):
-		return round(n / 500) * 500
+##########################################
+#			HELPER FUNCTIONS			 #
+##########################################
+def curr_ms():
+	return int(time.time() * 1000)
 
-def nearest_50(n):
-		return round(n / 50) * 50
+def nearest_nth(num, n):
+	return round(num / n) * n
+
+def pluralize(s, n):
+	if n == 1:
+		return s
+	if s.endswith('s'):
+		return s + 'es'
+	return s + 's'
 
 def tap_to_start():
-	i = 0
-	j = 0
-	while i < 5:
+	global FILE
+	j, limit = 0, 5
+	while limit > 0:
 		j = 0
+		screen.fill((255, 255, 255))
+		text = font3.render("Press ANY KEY {} {} To Start".format(limit, pluralize("Time", limit)), True, (0, 128, 0))
+		screen.blit(text,(300 - text.get_width() // 2, 200- text.get_height() // 2))
+		pygame.display.flip()
+		clock.tick(60)
 		for event in pygame.event.get():
 			if event.type == pygame.KEYDOWN and event.key < 300:
-				j = 1 # handles keys that registers as two keypresses
-				file.write("SENTINEL,NONE,{}\n".format(int(time.time() * 1000 - globalStart)))
+				j = 1 # handles buggy keys that registers as two keypresses
+				FILE.write("SENTINEL,NONE,{}\n".format(int(curr_ms()) - GLOBALSTART))
 				break
-		i += j
+		limit -= j
+
+##########################################
+#				CSV SETUP				 #
+##########################################
 path = file.replace(os.path.basename(file), "")
 if not os.path.isdir(path):
 	os.makedirs(path)
-file = open( file ,'w')
-file.write('keyPressed,wordSaid,timeStamp\n')
-# Fonts/size
+FILE = open(file ,'w')
+FILE.write('keyPressed,wordSaid,timeStamp\n')
+
+##########################################
+#				FONTS SETUP				 #
+##########################################
+R, G, B = 0, 128, 0 # text color (RGB255)
 font = pygame.font.SysFont("comicsansms", 2*72)
 font2 = pygame.font.SysFont("comicsansms", 90)
 font3 = pygame.font.SysFont("comicsansms", 50)
-#font4 = pygame.font.SysFont("comicsansms", 20)
 font4 = pygame.font.SysFont("comicsansms", 80)
-tmp = 128
-text = font.render("", True, (0, tmp, 0))
-text2 = font.render("", True, (0, tmp, 0))
-text3 = font3.render("", True, (0, tmp, 0))
-text4 = font4.render("", True, (0, tmp, 0))
+text = font.render("", True, (R, G, B))
+text2 = font.render("", True, (R, G, B))
+text3 = font3.render("", True, (R, G, B))
+text4 = font4.render("", True, (R, G, B))
+
+##########################################
+#			VOCABULARY SETUP			 #
+##########################################
 # list of words for training data
-#l=["yes","no","up", "down", "left", "right", "on", "off", "stop", "go"]
-#l = ["yes", "no", "stop"]
-l = ["yes", "no"]
-
-silence = ""
-
+WORD_LIST = ["yes","no","up", "down", "left", "right", "on", "off", "stop", "go"]
+if os.path.isfile("configuration.json"):
+	with open("configuration.json", 'r') as file:
+		config = json.load(file)
+	WORD_LIST = config['words']
+SILENCE = ""
 # Create non repeating queue with 3 elems to be shown on screen
 ltext_queue = deque()
-ltext = random.sample(l, 1)[0]
+ltext = random.sample(WORD_LIST, 1)[0]
 prevWord = None
-# 3 elems
-newl = set(l)
+
+##########################################
+#			WORDS QUEUE SETUP			 #
+##########################################
+newl = set(WORD_LIST)
 newl.discard(prevWord)
 ltext_queue.append(random.sample(newl, 1)[0])
 prevWord = ltext_queue[-1]
-newl = set(l)
+newl = set(WORD_LIST)
 newl.discard(prevWord)
 ltext_queue.append(random.sample(newl, 1)[0])
 prevWord = ltext_queue[-1]
-newl = set(l)
+newl = set(WORD_LIST)
 newl.discard(prevWord)
 ltext_queue.append(random.sample(newl, 1)[0])
 prevWord = ltext_queue[-1]
-# Set initial flags
-flag = 0
+
+##########################################
+#			GENERAL VARIABLES SETUP		 #
+##########################################
+display_flag = True
 last = 0
 pause = False
 next_word = False
 nlast = 0
-globalStart = int(time.time() * 1000)
 keydown = None
+GLOBALSTART = curr_ms()
 
-#Touch any key 5 times to start
+##########################################
+#				MAIN LOOP				 #
+##########################################
 tap_to_start()
-
 while not done:
-	# Key events
+	# Handle Keypress events
 	for event in pygame.event.get():
-		if event.type == pygame.QUIT:
-			done = True
-		if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+		# Exit button pressed, or ESC key pressed
+		if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+			print("File saved to {}".format(args.csv))
 			done = True
 		# Pause game key (Del on numpad, space, or q)
 		if event.type == pygame.KEYDOWN and event.key in [32, 113, 266]:
@@ -131,46 +162,45 @@ while not done:
 			elif (event.key == 256+15):
 				keydown = 'enter'
 
-	screen.fill((255, 255, 255))
-	# Screen pygame every n milliseconds
-	current = int(time.time() * 1000)-globalStart
+	# Set up text for screen output
+	current = curr_ms() - GLOBALSTART
 	if (current-last > delay or next_word):
 		last = current
-		flag = (flag+1)%2
-		if (flag):
-			text = font.render(silence, True, (0, 128, 0))
-			text2 = font.render(silence, True, (0, 128, 0))
-			text3 = font3.render(silence, True, (0, 0, 0))
-		else:
-			# Pop first elem in queue
+		display_flag = not display_flag
+		if display_flag:
+			# Get a non-repeating word from the queue
 			ltext = ltext_queue.popleft()
-			# Enqueue new unique elem
-			newl = set(l)
+			newl = set(WORD_LIST)
 			newl.discard(prevWord)
 			ltext_queue.append(random.sample(newl, 1)[0])
 			prevWord = ltext_queue[-1]
-			# If not pause, set text to be shown on screen
 			if pause:
 				text = font.render("PAUSE", True, (0, 128, 0))
 			else:
+				# Set various text to be shown on screen
 				text = font.render(ltext, True, (0, 128, 0))
 				text2 = font2.render(ltext_queue[0], True, (0, 60, 0))
 				text3 = font3.render(ltext_queue[1], True, (0, 0, 0))
-				time1 = datetime.datetime.fromtimestamp(float((time.time() * 1000)-globalStart)/1000).strftime('%M:%S')#'%H:%M:%S'
+				time1 = datetime.datetime.fromtimestamp((curr_ms() - GLOBALSTART) / 1000).strftime('%M:%S')
 				text4 = font4.render(str(time1), True, (0, 0, 0))
 			next_word = False
+		else:
+			text = font.render(SILENCE, True, (0, 128, 0))
+			text2 = font.render(SILENCE, True, (0, 128, 0))
+			text3 = font3.render(SILENCE, True, (0, 0, 0))
 
-	# CSV files every n milliseconds
-	ncurrent=nearest_50(int(time.time() * 1000)-globalStart)
+	# Write to CSV file after appropriate amount of time
+	ncurrent = nearest_nth(curr_ms() - GLOBALSTART, 50)
 	if (ncurrent-nlast > newDelay):
 		nlast = ncurrent
 		if pause:
-			file.write("PAUSE" + ',' + "PAUSE" + ',' + str(int(ncurrent)) + '\n')
+			FILE.write("PAUSE" + ',' + "PAUSE" + ',' + str(int(ncurrent)) + '\n')
 		else:
-			file.write((str(keydown)) + ',' + ltext + ',' + str(int(ncurrent)) + '\n')
+			FILE.write((str(keydown)) + ',' + ltext + ',' + str(int(ncurrent)) + '\n')
 		keydown = None
 
-	# Put text to screen
+	# Draw text to screen
+	screen.fill((255, 255, 255))
 	screen.blit(text,(320 - text.get_width() // 2, 200 - text.get_height() // 2))
 	screen.blit(text2,(320 - text2.get_width() // 2, 305 - text2.get_height() // 2))
 	screen.blit(text3,(320 - text3.get_width() // 2, 390 - text3.get_height() // 2))
