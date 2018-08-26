@@ -1,3 +1,4 @@
 {
-	"words": ["yes", "no"]
+	"words": ["yes", "no"],
+	"bucket": "BUCKET-NAME"
 }
