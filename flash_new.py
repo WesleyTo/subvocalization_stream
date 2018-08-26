@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import argparse
 import os
 import time
@@ -44,12 +43,16 @@ if not (file and delay):
 #			HELPER FUNCTIONS			 #
 ##########################################
 def curr_ms():
+	"""Returns the current time as milliseconds since the epoch"""
 	return int(time.time() * 1000)
 
 def nearest_nth(num, n):
+	"""Rounds a number to the nearest multiple of n"""
 	return round(num / n) * n
 
 def pluralize(s, n):
+	"""Naively pluralizes a word based on the quantity.
+	Doesn't handle special cases, such as Goose -> Geese"""
 	if n == 1:
 		return s
 	if s.endswith('s'):
@@ -57,6 +60,7 @@ def pluralize(s, n):
 	return s + 's'
 
 def tap_to_start():
+	"""Tells the user how to proceed with the program"""
 	global FILE
 	j, limit = 0, 5
 	while limit > 0:
