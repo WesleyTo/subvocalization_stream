@@ -3,6 +3,7 @@ from time import time
 from datetime import datetime
 
 def progress_bar(curr, total, tabs=0, prefix=""):
+	"""Prints a progress bar, tab-spaced, with an optional message as a prefix"""
 	block_char = u"\u2588"
 	pct_done = curr / total * 100
 	blocks = int(pct_done // 2)
@@ -17,6 +18,7 @@ def progress_bar(curr, total, tabs=0, prefix=""):
 	print("{}{}{}|{:<50}| {:.2f}% ({}/{})".format(ret, tabs, prefix, blocks, pct_done, curr, total), end=end)
 
 def run_command(command, output=False):
+	"""Runs a command in a subprocess, silent by default"""
 	if output:
 		subprocess.run(command)
 	else:
@@ -24,6 +26,7 @@ def run_command(command, output=False):
 		subprocess.run(command, stdout=NULL, stderr=NULL)
 
 def ms_to_strtime(ms):
+	"""Converts milliseconds to a human readable string"""
 	hours = int(ms // (3600000))
 	minutes = int((ms % 3600000) // 60000)
 	seconds = int((ms % 60000) // 1000)
