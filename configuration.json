@@ -1,4 +1,4 @@
 {
 	"words": ["yes", "no"],
-	"bucket": "BUCKET-NAME"
+	"bucket": "BUCKET-NAME (Perhaps add this file to the .gitignore to keep the bucket a secret)"
 }
