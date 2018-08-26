@@ -1,7 +1,7 @@
 import json, sys, re, subprocess, os
 from helpers import *
 
-CREDENTIALS = "credentials.json"
+CREDENTIALS = "configuration.json"
 
 def dir_to_date(s):
 	mon_str = {
