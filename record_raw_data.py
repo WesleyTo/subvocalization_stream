@@ -4,6 +4,7 @@ import serial
 import serial.tools.list_ports
 import wave
 import os
+from helpers import *
 
 ##########################################
 #		UTILITY VARIABLES AND FUNCTIONS	 #
@@ -14,17 +15,6 @@ BUF_SIZE = 2000 #2KB
 OUTPUT_DIR = "audio" + str(datetime.now()).replace(" ", "_").replace(":", "-")
 OUTPUT = OUTPUT_DIR + "/{}.wav"
 OUTPUT_LENGTH = 0.997 # seconds
-
-def sec_to_str(sec):
-	ms = str(sec % 1)[2:5]
-	days = int(sec // (60 * 60 * 24))
-	sec %= (60 * 60 * 24)
-	hours = int(sec // (60 * 60))
-	sec %= (60 * 60)
-	minutes = int(sec // 60)
-	sec %= 60
-	sec = int(sec)
-	return ("{:02}:{:02}:{:02}:{:02}.{}".format(days, hours, minutes, sec, ms))
 
 ##########################################
 #			FILE & DIRECTORY SETUP		 #
@@ -62,7 +52,7 @@ try:
 	sleep(1 - duration) # align to 1 second after doing initialization
 	while(True):
 		duration = time() - start
-		print("\r{}\tReading chunk #{}".format(sec_to_str(duration), chunk), end='')
+		print("\r{}\tReading chunk #{}".format(ms_to_strtime(duration * 1000), chunk), end='')
 		clip_counter += 1
 		chunk += 1
 
