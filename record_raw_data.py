@@ -13,7 +13,7 @@ SAMPLE_RATE = 1000
 BUF_SIZE = 2000 #2KB
 OUTPUT_DIR = "audio" + str(datetime.now()).replace(" ", "_").replace(":", "-")
 OUTPUT = OUTPUT_DIR + "/{}.wav"
-OUTPUT_LENGTH = 0.997 #seconds
+OUTPUT_LENGTH = 0.997 # seconds
 
 def sec_to_str(sec):
 	ms = str(sec % 1)[2:5]
@@ -59,7 +59,7 @@ try:
 	chunk = 0
 	start = time()
 	duration = time() - start
-	sleep(1 - duration)
+	sleep(1 - duration) # align to 1 second after doing initialization
 	while(True):
 		duration = time() - start
 		print("\r{}\tReading chunk #{}".format(sec_to_str(duration), chunk), end='')
