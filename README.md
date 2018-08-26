@@ -51,7 +51,11 @@ L__ split_audio
 
 #### `upload_audio.py`
 This script will upload the project files to a Google Storage Bucket, as determined by the `configuration.json` file
+- Prefixes all the files with the same date as the parent directory
 - `python upload_audio.py /path/to/08_25_subvoc`
+- Stores the split audio as `08_25_audio.zip`
+- Stores the original audio as `08_25_original_audio.zip`
+- Stores the CSV file as `08_25_outputs.csv`
 
 #### `check_audio.py`
 This script samples 10% of each label in a dataset and plays it back
@@ -66,14 +70,15 @@ This arduino code uses timer interrupts to send a timed data stream
 - It sends the signal over `Serial` as a bytestream
 
 #### `record_raw_data.py`
-This script takes reads in the bytestream from an Arduino and saves it as split audio (WAV) fiiles
+This script takes reads in the bytestream from an Arduino and saves it as split audio (WAV) files
 - Work in progress
 - The script searches for an Arduino automatically, and will raise an exception if it cannot find one
 - Once the Arduino is found, it will read the data into a buffer and save the buffered data into 1-second clips
 - The clips are stored in a timestamped audio directory
 
 ## To-Do
-- `record_raw_data.py` has no customization options
+- `record_raw_data.py`
+  - The script currently has no customization options
   - It saves files wherever the script is run. The output directory should be user selectable
   - It truncates the buffer to 1 second of data and saves it. The length should be user selectable
 - `main.ino`
@@ -87,3 +92,5 @@ This script takes reads in the bytestream from an Arduino and saves it as split 
   - The script should be able to read in and parse a post-processing configuration file so the user can define directory-specific post-processing requirements
 - `check_audio.py`
   - The script should generate an output file that stores the names of the files marked as incorrect or corrupt
+- `upload_audio.py`
+  - The script should also upload the yet-to-be-implemented `postprocess.json` as `08_25_postprocess.json`
