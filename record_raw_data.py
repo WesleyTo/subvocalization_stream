@@ -9,22 +9,11 @@ from helpers import *
 ##########################################
 #		UTILITY VARIABLES AND FUNCTIONS	 #
 ##########################################
-TEMP = "temp.out"
 SAMPLE_RATE = 1000
 BUF_SIZE = 2000 #2KB
 OUTPUT_DIR = "audio" + str(datetime.now()).replace(" ", "_").replace(":", "-")
 OUTPUT = OUTPUT_DIR + "/{}.wav"
 OUTPUT_LENGTH = 0.997 # seconds
-
-##########################################
-#			FILE & DIRECTORY SETUP		 #
-##########################################
-try:
-	os.remove(TEMP)
-except:
-	pass
-if not os.path.isdir(OUTPUT_DIR):
-	os.mkdir(OUTPUT_DIR)
 
 ##########################################
 #				PORT SETUP				 #
@@ -38,6 +27,12 @@ if not com_port:
 	raise Exception("Arduino device not found")
 port = serial.Serial(com_port,115200,timeout = None)
 print(">>> COM PORT: '{}'".format(com_port))
+
+##########################################
+#			FILE & DIRECTORY SETUP		 #
+##########################################
+if not os.path.isdir(OUTPUT_DIR):
+	os.mkdir(OUTPUT_DIR)
 
 ##########################################
 #			MAIN LOOP RECORDING			 #
