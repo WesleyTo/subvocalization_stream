@@ -5,7 +5,6 @@ import serial.tools.list_ports
 import wave
 import os
 
-
 ##########################################
 #		UTILITY VARIABLES AND FUNCTIONS	 #
 ##########################################
@@ -32,10 +31,6 @@ def sec_to_str(sec):
 ##########################################
 try:
 	os.remove(TEMP)
-except:
-	pass
-try:
-	os.remove(OUTPUT)
 except:
 	pass
 if not os.path.isdir(OUTPUT_DIR):
@@ -67,8 +62,7 @@ try:
 	sleep(1 - duration)
 	while(True):
 		duration = time() - start
-		#print("\r{}\tReading chunk #{}".format(sec_to_str(duration), chunk), end='')
-		print("{}\tReading chunk #{}".format(sec_to_str(duration), chunk))
+		print("\r{}\tReading chunk #{}".format(sec_to_str(duration), chunk), end='')
 		clip_counter += 1
 		chunk += 1
 
