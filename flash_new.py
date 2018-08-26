@@ -165,14 +165,11 @@ tap_to_start()
 while not done:
 	# Handle Keypress events
 	for event in pygame.event.get():
-		# Exit button pressed, or ESC key pressed
 		if is_escape_condition(event):
 			print("File saved to {}".format(args.csv))
 			done = True
-		# Pause game
 		if is_pause_condition(event):
 			pause = not pause
-		# Move to next word
 		if is_skip_condition(event):
 			next_word = not next_word
 		# All other keypresses
