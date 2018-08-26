@@ -2,8 +2,7 @@ import argparse
 import os
 from time import time
 import pygame
-from random import randint
-import random
+from random import randint, choice, sample
 from datetime import datetime
 import sys
 import json
@@ -51,7 +50,11 @@ def nearest_nth(num, n):
 	return round(num / n) * n
 
 def pluralize(s, n):
-	"""Naively pluralizes a word based on the quantity.
+	"""Naively pluralizes a singlular word based on the quantity.
+		Dog, 0 => Dogs
+		Dog, 1 => Dog
+		Dog, 2 => Dogs
+		Glass, 2 => Glasses
 	Doesn't handle special cases, such as Goose -> Geese"""
 	if n == 1:
 		return s
@@ -89,6 +92,7 @@ def is_skip_condition(event, keys=[271]):
 	return event.type == pygame.KEYDOWN and event.key in keys
 
 def process_keypress(event):
+	"""Returns the string representation of the key pressed"""
 	if (event.key >= 256 and event.key <= 265):
 		return str(event.key - 256)
 	elif (event.key == 256 + 15):
@@ -106,7 +110,7 @@ FILE.write('keyPressed,wordSaid,timeStamp\n')
 ##########################################
 #				FONTS SETUP				 #
 ##########################################
-R, G, B = 0, 128, 0 # text color (RGB255)
+R, G, B = 0, 128, 0 # text color (RGB-255)
 font = pygame.font.SysFont("comicsansms", 2*72)
 font2 = pygame.font.SysFont("comicsansms", 90)
 font3 = pygame.font.SysFont("comicsansms", 50)
@@ -119,32 +123,28 @@ text4 = font4.render("", True, (R, G, B))
 ##########################################
 #			VOCABULARY SETUP			 #
 ##########################################
-# list of words for training data
 WORD_LIST = ["yes","no","up", "down", "left", "right", "on", "off", "stop", "go"]
 if os.path.isfile("configuration.json"):
 	with open("configuration.json", 'r') as file:
 		config = json.load(file)
 	WORD_LIST = config['words']
 SILENCE = ""
-# Create non repeating queue with 3 elems to be shown on screen
-ltext_queue = deque()
-ltext = random.sample(WORD_LIST, 1)[0]
-prevWord = None
 
 ##########################################
 #			WORDS QUEUE SETUP			 #
 ##########################################
+ltext_queue = deque()
+ltext = choice(WORD_LIST)
 newl = set(WORD_LIST)
-newl.discard(prevWord)
-ltext_queue.append(random.sample(newl, 1)[0])
+ltext_queue.append(sample(newl, 1)[0])
 prevWord = ltext_queue[-1]
 newl = set(WORD_LIST)
 newl.discard(prevWord)
-ltext_queue.append(random.sample(newl, 1)[0])
+ltext_queue.append(sample(newl, 1)[0])
 prevWord = ltext_queue[-1]
 newl = set(WORD_LIST)
 newl.discard(prevWord)
-ltext_queue.append(random.sample(newl, 1)[0])
+ltext_queue.append(sample(newl, 1)[0])
 prevWord = ltext_queue[-1]
 
 ##########################################
@@ -186,7 +186,7 @@ while not done:
 			ltext = ltext_queue.popleft()
 			newl = set(WORD_LIST)
 			newl.discard(prevWord)
-			ltext_queue.append(random.sample(newl, 1)[0])
+			ltext_queue.append(sample(newl, 1)[0])
 			prevWord = ltext_queue[-1]
 			if pause:
 				text = font.render("PAUSE", True, (0, 128, 0))
