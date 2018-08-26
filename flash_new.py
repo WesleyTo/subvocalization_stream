@@ -1,10 +1,10 @@
 import argparse
 import os
-import time
+from time import time
 import pygame
 from random import randint
 import random
-import datetime
+from datetime import datetime
 import sys
 import json
 from collections import deque
@@ -44,7 +44,7 @@ if not (file and delay):
 ##########################################
 def curr_ms():
 	"""Returns the current time as milliseconds since the epoch"""
-	return int(time.time() * 1000)
+	return int(time() * 1000)
 
 def nearest_nth(num, n):
 	"""Rounds a number to the nearest multiple of n"""
@@ -62,11 +62,12 @@ def pluralize(s, n):
 def tap_to_start():
 	"""Tells the user how to proceed with the program"""
 	global FILE
-	j, limit = 0, 5
+	j, limit, s = 0, 5, "Press ANY KEY {} {} To Start"
 	while limit > 0:
 		j = 0
 		screen.fill((255, 255, 255))
-		text = font3.render("Press ANY KEY {} {} To Start".format(limit, pluralize("Time", limit)), True, (0, 128, 0))
+		t = s.format(limit, pluralize("Time", limit))
+		text = font3.render(t, True, (0, 128, 0))
 		screen.blit(text,(300 - text.get_width() // 2, 200- text.get_height() // 2))
 		pygame.display.flip()
 		clock.tick(60)
@@ -76,6 +77,22 @@ def tap_to_start():
 				FILE.write("SENTINEL,NONE,{}\n".format(int(curr_ms()) - GLOBALSTART))
 				break
 		limit -= j
+
+def is_escape_condition(event):
+	return ((event.type == pygame.QUIT) or
+		(event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE))
+
+def is_pause_condition(event, keys=[32, 113, 266]):
+	return event.type == pygame.KEYDOWN and event.key in keys
+
+def is_skip_condition(event, keys=[271]):
+	return event.type == pygame.KEYDOWN and event.key in keys
+
+def process_keypress(event):
+	if (event.key >= 256 and event.key <= 265):
+		return str(event.key - 256)
+	elif (event.key == 256 + 15):
+		return 'enter'
 
 ##########################################
 #				CSV SETUP				 #
@@ -149,22 +166,18 @@ while not done:
 	# Handle Keypress events
 	for event in pygame.event.get():
 		# Exit button pressed, or ESC key pressed
-		if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+		if is_escape_condition(event):
 			print("File saved to {}".format(args.csv))
 			done = True
-		# Pause game key (Del on numpad, space, or q)
-		if event.type == pygame.KEYDOWN and event.key in [32, 113, 266]:
+		# Pause game
+		if is_pause_condition(event):
 			pause = not pause
-		# Move to next word (enter on numpad)
-		if event.type == pygame.KEYDOWN and event.key == 271:
+		# Move to next word
+		if is_skip_condition(event):
 			next_word = not next_word
+		# All other keypresses
 		if event.type == pygame.KEYDOWN:
-			# Uncomment below to see key values 
-			# print(event.key)
-			if (event.key >= 256 and event.key <= 265):
-				keydown=str(event.key-256)
-			elif (event.key == 256+15):
-				keydown = 'enter'
+			keydown = process_keypress(event)
 
 	# Set up text for screen output
 	current = curr_ms() - GLOBALSTART
@@ -185,7 +198,7 @@ while not done:
 				text = font.render(ltext, True, (0, 128, 0))
 				text2 = font2.render(ltext_queue[0], True, (0, 60, 0))
 				text3 = font3.render(ltext_queue[1], True, (0, 0, 0))
-				time1 = datetime.datetime.fromtimestamp((curr_ms() - GLOBALSTART) / 1000).strftime('%M:%S')
+				time1 = datetime.fromtimestamp((curr_ms() - GLOBALSTART) / 1000).strftime('%M:%S')
 				text4 = font4.render(str(time1), True, (0, 0, 0))
 			next_word = False
 		else:
@@ -195,12 +208,13 @@ while not done:
 
 	# Write to CSV file after appropriate amount of time
 	ncurrent = nearest_nth(curr_ms() - GLOBALSTART, 50)
-	if (ncurrent-nlast > newDelay):
+	if (ncurrent - nlast > newDelay):
 		nlast = ncurrent
 		if pause:
-			FILE.write("PAUSE" + ',' + "PAUSE" + ',' + str(int(ncurrent)) + '\n')
+			s = "PAUSE,PAUSE,{}\n".format(ncurrent)
 		else:
-			FILE.write((str(keydown)) + ',' + ltext + ',' + str(int(ncurrent)) + '\n')
+			s = "{},{},{}\n".format(keydown, ltext, ncurrent)
+		FILE.write(s)
 		keydown = None
 
 	# Draw text to screen
