@@ -95,3 +95,8 @@ L__ split_audio
   - The script should generate an output file that stores the names of the files marked as incorrect or corrupt
 - `upload_audio.py`
   - The script should also upload the yet-to-be-implemented `postprocess.json` as `08_25_postprocess.json`
+  
+## Authors
+
+* **Wesley To** - *Initial work* - [Subvocalization](https://github.com/WesleyTo)
+* **Harrison Smith** - *Initial work* - [Subvocalization](https://github.com/dstar1)
