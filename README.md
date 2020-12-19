@@ -1,3 +1,10 @@
+# This project is no longer being maintained on this repo
+- All contributors to this project left the organization (42 Robotics) in late 2018. This project has not been, and will not be, updated by us, anymore.
+- Others have taken over the project. You can learn more or try reaching out to them via the resources below:
+  - https://hackaday.io/project/160715-cerebro-voice
+  - https://www.42.us.org/cerebro-voice-42-robotics-lab-develops-a-silent-speech-recognition-device-through-machine-learning/
+  - https://github.com/nugliar/subvocalization
+
 # Subvocalization
 - Files for the capture and processing of subvocal data as audio.
 - This project is currently the combination of two iterations of the project
